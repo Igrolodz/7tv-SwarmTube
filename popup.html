@@ -19,10 +19,17 @@
 
     <section id="emote-set">
         <span id="emote-set-header">Twitch streamer name</span>
-        <input type="text" id="twitch-name" name="twitch-name" value="vedal987"><button id="twitch-name-set" onclick="SetTwitchName()">Set</button>
+        <input type="text" id="twitch-name" name="twitch-name" value="vedal987"><button id="twitch-name-set">Set</button>
         <span id="emote-set-note">NOTE: default is vedal987</span>
     </section>
     
+    <!-- exclude specific emotes -->
+    <section id="emote-exclusion">
+        <span id="emote-set-header">Exclude specific emotes</span>
+        <input type="text" id="excluded-emotes" name="excluded-emotes" value=""><button id="excluded-emotes-set">Add</button>
+        <span id="emote-set-note">NOTE: emote names are case-sensitive</span>
+    </section>
+
     <script src="popup.js"></script>
 </body>
 </html>
