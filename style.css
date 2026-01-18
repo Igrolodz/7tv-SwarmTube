@@ -12,9 +12,30 @@ html{
     width: 300px;
     text-align: center;
     font-family: sans-serif;
-    background-color: var(--black);
 }
 
+body{
+    margin: 0;
+    padding: 10px;
+    border: 2px solid var(--pink);
+    box-shadow: inset 0 0 15px var(--purple);
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+html:before{
+    background: url(/images/background.png);
+    background-size: cover;
+    background-position: center;
+    content: "";
+    position: fixed;
+    top: -20px;
+    left: -20px;
+    width: calc(100% + 40px);
+    height: calc(100% + 40px);
+    z-index: -1;
+    filter: blur(8px);
+}
 h2{
     color: var(--white);
 }
