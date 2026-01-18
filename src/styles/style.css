@@ -199,3 +199,12 @@ svg:hover{
     cursor: pointer;
     transform: scale(1.05);
 }
+
+footer{
+    margin-top: 20px;
+    bottom: 10px;
+    text-align: center;
+    font-size: 0.8em;
+    color: var(--white);
+    opacity: .65;
+}
