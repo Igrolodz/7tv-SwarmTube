@@ -12,11 +12,11 @@
     "content_scripts": [
         {
             "matches": ["https://*.youtube.com/*"],
-            "js": ["content.js"]
+            "js": ["src/scripts/content.js"]
         }
     ],
     "action": {
-        "default_popup": "popup.html"
+        "default_popup": "src/templates/popup.html"
     },
     "permissions": ["storage", "identity"],
     "host_permissions": [
@@ -24,6 +24,6 @@
         "https://id.twitch.tv/*"
     ],
     "background": {
-        "service_worker": "background.js"
+        "service_worker": "src/scripts/background.js"
     }
 }

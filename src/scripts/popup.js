@@ -95,7 +95,7 @@ exEmoteBtn.addEventListener("click", async() => {
 
 emoteListBtn.addEventListener("click", async() => {
     chrome.windows.create({
-        url: chrome.runtime.getURL("excluded.html"),
+        url: chrome.runtime.getURL("src/templates/excluded.html"),
         type: "popup",
         width: 420,
         height: 600
