@@ -18,5 +18,12 @@
     "action": {
         "default_popup": "popup.html"
     },
-    "permissions": ["storage"]
+    "permissions": ["storage", "identity"],
+    "host_permissions": [
+        "https://api.twitch.tv/*",
+        "https://id.twitch.tv/*"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    }
 }

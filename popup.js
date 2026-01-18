@@ -36,15 +36,59 @@ toggleBtn.addEventListener("click", async () => {
     }
 });
 
-setNameBtn.addEventListener("click", async() => {
-    const twitchName = document.getElementById("twitch-name").value;
-    await chrome.storage.local.set({twitchName: twitchName});
+setNameBtn.addEventListener("click", async () => {
+    const { twitchAccessToken, twitchTokenExpiry } = await chrome.storage.local.get(["twitchAccessToken", "twitchTokenExpiry"]);
+    
+    if (!twitchAccessToken || Date.now() >= twitchTokenExpiry){
+        // Trigger Twitch login
+        console.log("Starting Twitch login...");
+        chrome.runtime.sendMessage({ type: "TWICH_LOGIN" });
+        return;
+    }
+
+    const twitchName = document.getElementById("twitch-name");
+    if (!twitchName.value){
+        twitchName.value = "INVALID NAME!";
+        setTimeout(() => {
+            twitchName.value = "";
+        }, 1000);
+        return;
+    }
+
+    try {
+        const response = await fetch(`https://api.twitch.tv/helix/users?login=${twitchName.value}`, {
+            method: 'GET',
+            headers: {
+                'Client-ID': 'h2x6fqe7pc2f7qxitb3l5p34kx78bk',
+                'Authorization': `Bearer ${twitchAccessToken}`
+            }
+        });
+        const data = await response.json();
+        
+        await chrome.storage.local.set({twitchName: twitchName.value, twitchUserID: data.data[0].id});
+
+        twitchName.value = "Saved!";
+        setTimeout(() => {
+            twitchName.value = "";
+        }, 1000);
+        
+    } catch (error) {
+        twitchName.value = "INVALID!";
+        console.error(`Error fetching Twitch user: ${error}`);
+
+        setTimeout(() => {
+            twitchName.value = "";
+        }, 1000);
+        return;
+    }
+
+
 });
 
 exEmoteBtn.addEventListener("click", async() => {
     const excludedEmote = document.getElementById("excluded-emotes").value;
     const { excludedEmotes = [] } = await chrome.storage.local.get("excludedEmotes");
-    
+
     excludedEmotes.push(excludedEmote);
     await chrome.storage.local.set({excludedEmotes: excludedEmotes});
 });
