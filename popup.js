@@ -1,4 +1,5 @@
 const toggleBtn = document.getElementById("toggle");
+const setNameBtn = document.getElementById("twitch-name-set");
 
 // Initialize toggle state
 chrome.storage.local.get("enabled").then(({ enabled }) => {
@@ -11,7 +12,12 @@ chrome.storage.local.get("enabled").then(({ enabled }) => {
     }
 });
 
-var state = true;
+chrome.storage.local.get("twitchName").then(({ twitchName }) => {
+    if (twitchName) {
+        document.getElementById("twitch-name").value = twitchName;
+    }
+});
+
 toggleBtn.addEventListener("click", async () => {
     const { enabled } = await chrome.storage.local.get("enabled");
     const newState = !(enabled ?? false);
@@ -26,4 +32,9 @@ toggleBtn.addEventListener("click", async () => {
         toggleBtn.classList.remove("on");
         toggleBtn.classList.add("off");
     }
+});
+
+setNameBtn.addEventListener("click", async() => {
+    const twitchName = document.getElementById("twitch-name").value;
+    await chrome.storage.local.set({twitchName: twitchName});
 });
