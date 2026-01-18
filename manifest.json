@@ -4,10 +4,10 @@
     "version": "1.0",
     "description": "Extension applying 7TV emotes to youtube comment section",
     "icons": {
-        "16": "images/icon.png",
-        "32": "images/icon.png",
-        "64": "images/icon.png",
-        "128": "images/icon.png"
+        "16": "images/NurIcon.png",
+        "32": "images/NurIcon.png",
+        "64": "images/NurIcon.png",
+        "128": "images/NurIcon.png"
     },
     "content_scripts": [
         {
