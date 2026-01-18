@@ -1,6 +1,7 @@
 const toggleBtn = document.getElementById("toggle");
 const setNameBtn = document.getElementById("twitch-name-set");
 const exEmoteBtn = document.getElementById("excluded-emotes-set");
+const emoteListBtn = document.getElementById("emote-list");
 
 // Initialize toggle state
 chrome.storage.local.get("enabled").then(({ enabled }) => {
@@ -46,4 +47,13 @@ exEmoteBtn.addEventListener("click", async() => {
     
     excludedEmotes.push(excludedEmote);
     await chrome.storage.local.set({excludedEmotes: excludedEmotes});
+});
+
+emoteListBtn.addEventListener("click", async() => {
+    chrome.windows.create({
+        url: chrome.runtime.getURL("excluded.html"),
+        type: "popup",
+        width: 420,
+        height: 600
+    });
 });
