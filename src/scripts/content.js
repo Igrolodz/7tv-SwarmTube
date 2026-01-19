@@ -23,7 +23,6 @@ const observer = new MutationObserver((mutations) => {
     }
 });
 
-// Start watching the entire body for changes in the structure
 observer.observe(document.body, { childList: true, subtree: true });
 
 
@@ -55,6 +54,6 @@ async function processComment(element) {
     });
 
     if (hasEmote) {
-        element.innerHTML = text;
+        element.innerHTML = processedParts.join('');
     }
 }
