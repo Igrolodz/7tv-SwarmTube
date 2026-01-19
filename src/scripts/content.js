@@ -1,6 +1,9 @@
 var emoteSet = [];
 
 async function loadEmotes(){
+    var enabled = await chrome.storage.local.get("enabled");
+    if (!enabled.enabled) return;
+
     const response = await chrome.runtime.sendMessage({ type: 'GET_7TV_EMOTES' });
     emoteSet = response.emotes;
     console.log("Loaded emote set:", emoteSet);

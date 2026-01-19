@@ -5,6 +5,11 @@ const emoteListBtn = document.getElementById("emote-list");
 
 // Initialize toggle state
 chrome.storage.local.get("enabled").then(({ enabled }) => {
+    if (!enabled && enabled !== false) {
+        enabled = true;
+        chrome.storage.local.set({ enabled: true });
+    }
+    
     if (enabled) {
         toggleBtn.classList.remove("off");
         toggleBtn.classList.add("on");
