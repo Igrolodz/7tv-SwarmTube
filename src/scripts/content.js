@@ -32,14 +32,26 @@ async function processComment(element) {
     let hasEmote = false;
 
     console.log("Processing comment:", text);
-    emoteSet.forEach((emote) => {
-        const regex = new RegExp(`\\b${emote.name}\\b`, 'g');
-        if (regex.test(text)) {
-            hasEmote = true;
-            // Replace text name with an HTML image string
-            const imgTag = `<img src="${emote.url}" title="${emote.name}" style="height: 24px; vertical-align: bottom;">`;
-            text = text.replace(regex, imgTag);
+    
+    // Split text to preserve timestamps (e.g., 1:23, 6:07)
+    const parts = text.split(/(\d+:\d+(?::\d+)?)/g);
+    
+    const processedParts = parts.map((part, index) => {
+        if (index % 2 === 1) {
+            return part;
         }
+        
+        let processedPart = part;
+        emoteSet.forEach((emote) => {
+            const regex = new RegExp(`\\b${emote.name}\\b`, 'g');
+            if (regex.test(processedPart)) {
+                hasEmote = true;
+                const imgTag = `<img src="${emote.url}" title="${emote.name}" style="height: 24px; vertical-align: bottom;">`;
+                processedPart = processedPart.replace(regex, imgTag);
+            }
+        });
+        
+        return processedPart;
     });
 
     if (hasEmote) {
