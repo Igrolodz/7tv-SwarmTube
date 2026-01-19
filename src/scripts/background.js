@@ -46,18 +46,31 @@ function handleAuthRedirect(redirectUrl) {
 
 async function getEmotes(){
     const emoteSet = await chrome.storage.local.get(['emoteSet']);
-    if(!emoteSet || Object.keys(emoteSet.emoteSet).length === 0){
+    if(!emoteSet || !emoteSet.emoteSet || Object.keys(emoteSet.emoteSet).length === 0){
         const userID = await chrome.storage.local.get("twitchUserID");
-        if (!userID.twitchUserID) return;
+        
+        if (!userID.twitchUserID) userID.twitchUserID = "85498365"; // Default to Nurstreamer
 
-        const response = await fetch(`https://7tv.io/v3/users/twitch/${userID.twitchUserID}`);
-        const data = await response.json();
-        const setID = data.emote_set.id;
+        const [globalRes, streamerRes] = await Promise.all([
+            fetch('https://7tv.io/v3/emote-sets/global'),
+            fetch(`https://7tv.io/v3/users/twitch/${userID.twitchUserID}`),
+        ]);
+        const globalData = await globalRes.json();
+        const streamerData = await streamerRes.json();
+       
+        
+        const streamerSetID = streamerData.emote_set_id;
+        const setResponse = await fetch(`https://7tv.io/v3/emote-sets/${streamerSetID}`);
+        const streamerSetData = await setResponse.json();
 
-        const setResponse = await fetch(`https://7tv.io/v3/emote-sets/${setID}`);
-        const setData = await setResponse.json();
+        const allEmotes = [
+            ...globalData.emotes,
+            ...streamerSetData.emotes
+        ]
 
-        var mappedEmotes = setData.emotes.map(e => ({
+
+
+        var mappedEmotes = allEmotes.map(e => ({
             name: e.name,
             url: `https:${e.data.host.url}/2x.webp`
         }));
@@ -68,8 +81,4 @@ async function getEmotes(){
     }
 
     return emoteSet.emoteSet;
-}
-
-async function fetch7tvAPI(){
-
 }
