@@ -1,4 +1,5 @@
 var emoteSet = [];
+var excludedEmotes = [];
 
 async function loadEmotes(){
     var enabled = await chrome.storage.local.get("enabled");
@@ -7,6 +8,10 @@ async function loadEmotes(){
     const response = await chrome.runtime.sendMessage({ type: 'GET_7TV_EMOTES' });
     emoteSet = response.emotes;
     console.log("Loaded emote set:", emoteSet);
+
+    const excluded = await chrome.storage.local.get("excludedEmotes");
+    excludedEmotes = excluded.excludedEmotes || [];
+    console.log("Loaded excluded emotes:", excludedEmotes);
 }
 
 loadEmotes();
@@ -45,6 +50,8 @@ async function processComment(element) {
         
         let processedPart = part;
         emoteSet.forEach((emote) => {
+            if (excludedEmotes.includes(emote.name)) return;
+            
             const regex = new RegExp(`\\b${emote.name}\\b`, 'g');
             if (regex.test(processedPart)) {
                 hasEmote = true;
