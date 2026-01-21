@@ -38,37 +38,56 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 
 async function processComment(element) {
-    let text = element.innerText;
-    let hasEmote = false;
+    console.log("Processing comment");
+    processTextNodes(element);
+}
 
-    console.log("Processing comment:", text);
+function processTextNodes(node) {
+    if (node.hasAttribute && node.hasAttribute('data-emotes-processed')) return;
     
-    // Split text to preserve timestamps (e.g., 1:23, 6:07)
-    const parts = text.split(/(\d+:\d+(?::\d+)?)/g);
-    
-    const processedParts = parts.map((part, index) => {
-        if (index % 2 === 1) {
-            return part;
-        }
-        
-        let processedPart = part;
+    const walk = document.createTreeWalker(
+        node,
+        NodeFilter.SHOW_TEXT,
+        null,
+        false
+    );
+
+    const textNodes = [];
+    let currentNode;
+    while (currentNode = walk.nextNode()) {
+        textNodes.push(currentNode);
+    }
+
+    textNodes.forEach(textNode => {
+        let text = textNode.textContent;
+        let newHTML = text;
+        let hasEmote = false;
+
         emoteSet.forEach((emote) => {
             if (excludedEmotes.includes(emote.name)) return;
             
             const regex = new RegExp(`\\b${emote.name}\\b`, 'g');
-            if (regex.test(processedPart)) {
+            if (regex.test(newHTML)) {
                 hasEmote = true;
                 const heightStyle = emoteSize === 1 ? "height: 24px;" : "";
                 const imgTag = `<img src="${emote.url}" title="${emote.name}" style="vertical-align: bottom; ${heightStyle}">`;
-
-                processedPart = processedPart.replace(regex, imgTag);
+                newHTML = newHTML.replace(regex, imgTag);
             }
         });
-        
-        return processedPart;
-    });
 
-    if (hasEmote) {
-        element.innerHTML = processedParts.join('');
+        if (hasEmote) {
+            const temp = document.createElement('span');
+            temp.innerHTML = newHTML;
+            
+            const parent = textNode.parentNode;
+            while (temp.firstChild) {
+                parent.insertBefore(temp.firstChild, textNode);
+            }
+            parent.removeChild(textNode);
+        }
+    });
+    
+    if (node.setAttribute) {
+        node.setAttribute('data-emotes-processed', 'true');
     }
 }
