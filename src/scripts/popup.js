@@ -3,6 +3,7 @@ const setNameBtn = document.getElementById("twitch-name-set");
 const exEmoteBtn = document.getElementById("excluded-emotes-set");
 const emoteListBtn = document.getElementById("emote-list");
 const emoteSizeInput = document.getElementById("emote-size");
+const refreshEmotesBtn = document.getElementById("refresh-emotes");
 
 // Initialize toggle state
 chrome.storage.local.get("enabled").then(({ enabled }) => {
@@ -101,7 +102,7 @@ setNameBtn.addEventListener("click", async () => {
 
 });
 
-exEmoteBtn.addEventListener("click", async() => {
+exEmoteBtn.addEventListener("click", async () => {
     const excludedEmoteField = document.getElementById("excluded-emotes");
     var excludedEmote = excludedEmoteField.value;
     const { excludedEmotes = [] } = await chrome.storage.local.get("excludedEmotes");
@@ -123,7 +124,7 @@ exEmoteBtn.addEventListener("click", async() => {
     }, 1000);
 });
 
-emoteListBtn.addEventListener("click", async() => {
+emoteListBtn.addEventListener("click", async () => {
     chrome.windows.create({
         url: chrome.runtime.getURL("src/templates/excluded.html"),
         type: "popup",
@@ -132,8 +133,26 @@ emoteListBtn.addEventListener("click", async() => {
     });
 });
 
-emoteSizeInput.addEventListener("input", async() => {
+emoteSizeInput.addEventListener("input", async () => {
     const sizeValue = document.getElementById("size-value");
     sizeValue.textContent = `${emoteSizeInput.value}x`;
     await chrome.storage.local.set({emoteSize: parseInt(emoteSizeInput.value)});
+});
+
+
+refreshEmotesBtn.addEventListener("click", async () => {
+    refreshEmotesBtn.textContent = "Reloading...";
+    var response = await chrome.runtime.sendMessage({ type: "RELOAD_7TV_EMOTES" });
+    if (response.success){
+        refreshEmotesBtn.textContent = "Success!";
+        setTimeout(() => {
+            refreshEmotesBtn.textContent = "Reload Emotes";
+        }, 2000);
+    }
+    else{
+        refreshEmotesBtn.textContent = "Error!";
+        setTimeout(() => {
+            refreshEmotesBtn.textContent = "Reload Emotes";
+        }, 2000);
+    }
 });

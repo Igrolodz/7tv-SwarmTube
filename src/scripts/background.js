@@ -10,6 +10,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             sendResponse({ emotes });
         });
     }
+
+    if(msg.type === "RELOAD_7TV_EMOTES"){
+        reloadEmotes().then(() => {
+            sendResponse({ success: true });
+        });
+    }
     return true;
 });
 
@@ -47,38 +53,42 @@ function handleAuthRedirect(redirectUrl) {
 async function getEmotes(){
     const emoteSet = await chrome.storage.local.get(['emoteSet']);
     if(!emoteSet || !emoteSet.emoteSet || Object.keys(emoteSet.emoteSet).length === 0){
-        const userID = await chrome.storage.local.get("twitchUserID");
         
-        if (!userID.twitchUserID) userID.twitchUserID = "85498365"; // Default to Nurstreamer
-
-        const [globalRes, streamerRes] = await Promise.all([
-            fetch('https://7tv.io/v3/emote-sets/global'),
-            fetch(`https://7tv.io/v3/users/twitch/${userID.twitchUserID}`),
-        ]);
-        const globalData = await globalRes.json();
-        const streamerData = await streamerRes.json();
-       
-        
-        const streamerSetID = streamerData.emote_set_id;
-        const setResponse = await fetch(`https://7tv.io/v3/emote-sets/${streamerSetID}`);
-        const streamerSetData = await setResponse.json();
-
-        const allEmotes = [
-            ...globalData.emotes,
-            ...streamerSetData.emotes
-        ]
-
-
-
-        var mappedEmotes = allEmotes.map(e => ({
-            name: e.name,
-            url: `https:${e.data.host.url}/2x.webp`
-        }));
-
-        await chrome.storage.local.set({ emoteSet: mappedEmotes });
-
+        await reloadEmotes();
         return mappedEmotes;
     }
 
     return emoteSet.emoteSet;
+}
+
+async function reloadEmotes(){
+    const userID = await chrome.storage.local.get("twitchUserID");
+    
+    if (!userID.twitchUserID) userID.twitchUserID = "85498365"; // Default to Nurstreamer
+
+    const [globalRes, streamerRes] = await Promise.all([
+        fetch('https://7tv.io/v3/emote-sets/global'),
+        fetch(`https://7tv.io/v3/users/twitch/${userID.twitchUserID}`),
+    ]);
+    const globalData = await globalRes.json();
+    const streamerData = await streamerRes.json();
+    
+    
+    const streamerSetID = streamerData.emote_set_id;
+    const setResponse = await fetch(`https://7tv.io/v3/emote-sets/${streamerSetID}`);
+    const streamerSetData = await setResponse.json();
+
+    const allEmotes = [
+        ...globalData.emotes,
+        ...streamerSetData.emotes
+    ]
+
+    const emoteSize = await chrome.storage.local.get("emoteSize");
+
+    var mappedEmotes = allEmotes.map(e => ({
+        name: e.name,
+        url: `https:${e.data.host.url}/${emoteSize.emoteSize}x.webp`
+    }));
+
+    await chrome.storage.local.set({ emoteSet: mappedEmotes });
 }
