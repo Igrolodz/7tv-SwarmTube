@@ -91,11 +91,25 @@ setNameBtn.addEventListener("click", async () => {
 });
 
 exEmoteBtn.addEventListener("click", async() => {
-    const excludedEmote = document.getElementById("excluded-emotes").value;
+    const excludedEmoteField = document.getElementById("excluded-emotes");
+    var excludedEmote = excludedEmoteField.value;
     const { excludedEmotes = [] } = await chrome.storage.local.get("excludedEmotes");
+
+    if (!excludedEmote || excludedEmotes.includes(excludedEmote)){
+        excludedEmoteField.value = "INVALID OR ALREADY EXCLUDED!";
+        setTimeout(() => {
+            excludedEmoteField.value = "";
+        }, 1000);
+        return;
+    }
 
     excludedEmotes.push(excludedEmote);
     await chrome.storage.local.set({excludedEmotes: excludedEmotes});
+    
+    excludedEmoteField.value = "Saved!";
+    setTimeout(() => {
+        excludedEmoteField.value = "";
+    }, 1000);
 });
 
 emoteListBtn.addEventListener("click", async() => {
