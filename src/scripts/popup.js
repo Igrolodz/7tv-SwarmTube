@@ -2,6 +2,7 @@ const toggleBtn = document.getElementById("toggle");
 const setNameBtn = document.getElementById("twitch-name-set");
 const exEmoteBtn = document.getElementById("excluded-emotes-set");
 const emoteListBtn = document.getElementById("emote-list");
+const emoteSizeInput = document.getElementById("emote-size");
 
 // Initialize toggle state
 chrome.storage.local.get("enabled").then(({ enabled }) => {
@@ -23,6 +24,16 @@ chrome.storage.local.get("twitchName").then(({ twitchName }) => {
     if (twitchName) {
         document.getElementById("twitch-name").value = twitchName;
     }
+});
+
+chrome.storage.local.get("emoteSize").then(({ emoteSize }) => {
+    if (!emoteSize) {
+        emoteSize = 2;
+        chrome.storage.local.set({ emoteSize: 2 });
+    }
+    emoteSizeInput.value = emoteSize;
+    const sizeValue = document.getElementById("size-value");
+    sizeValue.textContent = `${emoteSize}x`;
 });
 
 toggleBtn.addEventListener("click", async () => {
@@ -119,4 +130,10 @@ emoteListBtn.addEventListener("click", async() => {
         width: 420,
         height: 600
     });
+});
+
+emoteSizeInput.addEventListener("input", async() => {
+    const sizeValue = document.getElementById("size-value");
+    sizeValue.textContent = `${emoteSizeInput.value}x`;
+    await chrome.storage.local.set({emoteSize: parseInt(emoteSizeInput.value)});
 });

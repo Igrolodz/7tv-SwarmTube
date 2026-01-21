@@ -136,7 +136,7 @@ section{
     font-size: 1.3em;
 }
 
-input{
+input[type="text"]{
     width: 182px;
     padding: 10px;
     border: 2px solid var(--gray);
@@ -148,7 +148,7 @@ input{
     transition: all 0.3s ease;
 }
 
-input:active, input:focus{
+input:active[type="text"], input:focus[type="text"]{
     outline: none;
     border-color: var(--pink);
     box-shadow: inset 0 0 15px var(--pink);
@@ -207,4 +207,67 @@ footer{
     font-size: 0.8em;
     color: var(--white);
     opacity: .65;
+}
+
+#size-picker-header{
+    font-size: 1.3em;
+    margin-bottom: 10px;
+    display: block;
+}
+
+#range-wrapper{
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+#size-value{
+    font-size: 1.5em;
+    width: 30px;
+    text-align: center;
+    font-weight: bold;
+}
+
+#emote-size{
+    width: 200px;
+    height: 8px;
+    cursor: pointer;
+    appearance: none;
+    background: linear-gradient(90deg, var(--purple), var(--pink));
+    border-radius: 500px;
+    outline: none;
+    box-shadow: 0 0 10px var(--gray);
+    transition: all 0.3s ease;
+}
+
+#emote-size::-webkit-slider-thumb{
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background-color: var(--white);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--pink);
+    transition: all 0.3s ease;
+}
+
+#emote-size::-webkit-slider-thumb:hover{
+    transform: scale(1.1);
+    box-shadow: 0 0 15px var(--pink);
+}
+
+#emote-size::-moz-range-thumb{
+    width: 20px;
+    height: 20px;
+    background-color: var(--white);
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--pink);
+    transition: all 0.3s ease;
+}
+
+#emote-size::-moz-range-thumb:hover{
+    transform: scale(1.1);
+    box-shadow: 0 0 15px var(--pink);
 }
