@@ -84,10 +84,11 @@ async function reloadEmotes(){
     ]
 
     const emoteSize = await chrome.storage.local.get("emoteSize");
+    if (!emoteSize.emoteSize || emoteSize.emoteSize === 1) emoteSize.emoteSize = 2;
 
     var mappedEmotes = allEmotes.map(e => ({
         name: e.name,
-        url: `https:${e.data.host.url}/${emoteSize.emoteSize}x.webp`
+        url: `https:${e.data.host.url}/${emoteSize.emoteSize-1}x.webp`
     }));
 
     await chrome.storage.local.set({ emoteSet: mappedEmotes });

@@ -1,5 +1,6 @@
 var emoteSet = [];
 var excludedEmotes = [];
+var emoteSize = 2;
 
 async function loadEmotes(){
     var enabled = await chrome.storage.local.get("enabled");
@@ -10,6 +11,8 @@ async function loadEmotes(){
     console.log("Loaded emote set:", emoteSet);
 
     const excluded = await chrome.storage.local.get("excludedEmotes");
+    const size = await chrome.storage.local.get("emoteSize");
+    emoteSize = size.emoteSize || 2;
     excludedEmotes = excluded.excludedEmotes || [];
     console.log("Loaded excluded emotes:", excludedEmotes);
 }
@@ -55,7 +58,9 @@ async function processComment(element) {
             const regex = new RegExp(`\\b${emote.name}\\b`, 'g');
             if (regex.test(processedPart)) {
                 hasEmote = true;
-                const imgTag = `<img src="${emote.url}" title="${emote.name}" style="height: 24px; vertical-align: bottom;">`;
+                const heightStyle = emoteSize === 1 ? "height: 24px;" : "";
+                const imgTag = `<img src="${emote.url}" title="${emote.name}" style="vertical-align: bottom; ${heightStyle}">`;
+
                 processedPart = processedPart.replace(regex, imgTag);
             }
         });
