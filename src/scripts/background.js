@@ -16,6 +16,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             sendResponse({ success: true });
         });
     }
+    if(msg.type === "GET_EMOTE_SUGGESTIONS"){
+        getEmoteSuggestions(msg.query).then(suggestions => {
+            sendResponse({ suggestions });
+        });
+    }
+
     return true;
 });
 
@@ -92,4 +98,10 @@ async function reloadEmotes(){
     }));
 
     await chrome.storage.local.set({ emoteSet: mappedEmotes });
+}
+
+async function getEmoteSuggestions(query) {
+    const emoteSet = await getEmotes();
+    const suggestions = emoteSet.filter(emote => emote.name.toLowerCase().startsWith(query.toLowerCase()));
+    return suggestions.slice(0, 10);
 }

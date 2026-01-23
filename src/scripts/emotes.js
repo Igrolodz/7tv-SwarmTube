@@ -62,8 +62,6 @@ function processTextNodes(node) {
         let newHTML = text;
         let hasEmote = false;
 
-        console.log("Processing comment:", text);
-    
         emoteSet.forEach((emote) => {
             if (excludedEmotes.includes(emote.name)) return;
             
