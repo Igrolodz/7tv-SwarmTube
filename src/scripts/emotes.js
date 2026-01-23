@@ -38,7 +38,6 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 
 async function processComment(element) {
-    console.log("Processing comment");
     processTextNodes(element);
 }
 
@@ -63,6 +62,8 @@ function processTextNodes(node) {
         let newHTML = text;
         let hasEmote = false;
 
+        console.log("Processing comment:", text);
+    
         emoteSet.forEach((emote) => {
             if (excludedEmotes.includes(emote.name)) return;
             
