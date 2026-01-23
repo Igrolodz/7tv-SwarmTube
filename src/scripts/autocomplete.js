@@ -213,6 +213,37 @@ waitForElement('#contenteditable-root[contenteditable="true"]')
                 }
             }
         });
+
+        // Hide dropdown when clicking outside or losing focus
+        document.addEventListener('selectionchange', () => {
+            const selection = window.getSelection();
+            if (!selection.rangeCount || !dropdown) return;
+            
+            const range = selection.getRangeAt(0);
+            const container = range.commonAncestorContainer;
+            
+            // Check if selection is outside the comment field
+            const isInsideCommentField = commentField.contains(container) || commentField === container;
+            
+            if (!isInsideCommentField && currentSuggestions.length > 0) {
+                dropdown.style.display = "none";
+                currentSuggestions = [];
+                activeIndex = -1;
+            }
+        });
+
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!dropdown) return;
+            
+            const isClickInside = commentField.contains(e.target) || dropdown.contains(e.target);
+            
+            if (!isClickInside && currentSuggestions.length > 0) {
+                dropdown.style.display = "none";
+                currentSuggestions = [];
+                activeIndex = -1;
+            }
+        });
     })
     .catch(error => {
         console.error("Failed to find comment field:", error);
