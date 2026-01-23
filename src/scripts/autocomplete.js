@@ -1,3 +1,5 @@
+// fuck Youtube DOM. Shit so complicated I had to start doing comments
+
 
 // Function to wait for an element to appear in the DOM
 /** @returns {Promise<Element>} */ 
@@ -29,9 +31,24 @@ waitForElement('#contenteditable-root[contenteditable="true"]')
     .then(commentField => {
         console.log("Comment field found:", commentField);
         
+        let activeIndex = -1;
+        let currentSuggestions = [];
+
+        const dropdown = document.querySelector('tp-yt-iron-dropdown#dropdown.style-scope.ytd-emoji-input');
+
         commentField.addEventListener('input', async (event) => {
-            const cursorPosition = commentField.selectionStart;
-            const textBeforeCursor = commentField.innerHTML.substring(0, cursorPosition);
+            
+            // Get cursor position in contenteditable element
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            
+            const range = selection.getRangeAt(0);
+            const preCaretRange = range.cloneRange();
+            preCaretRange.selectNodeContents(commentField);
+            preCaretRange.setEnd(range.endContainer, range.endOffset);
+            const cursorPosition = preCaretRange.toString().length;
+            
+            const textBeforeCursor = commentField.textContent.substring(0, cursorPosition);
             const match = textBeforeCursor.match(/:([a-zA-Z0-9_]{2,})$/);
 
             if (match) {
@@ -40,15 +57,44 @@ waitForElement('#contenteditable-root[contenteditable="true"]')
                 const suggestions = response.suggestions;
                 console.log("Emote suggestions for query", query, ":", suggestions);
                 
-                const dropdown = document.querySelector('tp-yt-iron-dropdown#dropdown.style-scope.ytd-emoji-input');
 
                 console.log("Dropdown element:", dropdown);
 
-                // Here you would typically show the suggestions in a dropdown UI
+                dropdown.style.display = "";
+
+                
+                // Clear all suggestions (native and custom)
                 const dropdownContent = dropdown.querySelector('.dropdown-content');
-                suggestions.forEach(element => {
+                dropdownContent.innerHTML = '';
+                
+                currentSuggestions = [];
+                
+                // Position dropdown at cursor and style
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    const rect = range.getBoundingClientRect();
+                    
+                    // Styling for dropdown
+                    dropdown.style.position = 'fixed';
+                    dropdown.style.left = rect.left + 'px';
+                    dropdown.style.top = (rect.bottom + 5) + 'px';
+                    dropdown.style.zIndex = '9999';
+                    dropdown.style.maxHeight = '200px';
+                    dropdown.style.width = '300px';
+                    dropdown.style.overflowY = 'auto';
+
+                    dropdownContent.style.maxHeight = '200px';
+                    dropdownContent.style.maxWidth = '';
+                    dropdownContent.style.width = '300px';
+                    dropdownContent.style.overflowY = 'auto';
+                }
+
+                // custom suggestrions
+                suggestions.forEach((element, index) => {
                     let suggestionElement = dropdownContent.appendChild(document.createElement('ytd-emoji-suggestion'));
                     suggestionElement.classList.add('style-scope', 'ytd-emoji-input');
+                    currentSuggestions.push({ element: suggestionElement, data: element });
                     
                     let item = suggestionElement.appendChild(document.createElement('tp-yt-paper-item'));
                     item.classList.add('style-scope', 'ytd-emoji-suggestion');
@@ -58,17 +104,18 @@ waitForElement('#contenteditable-root[contenteditable="true"]')
                     item.setAttribute('aria-disabled', "false");
 
                     let img = item.appendChild(document.createElement('img'));
-                    img.classList.add('style-scope', 'ytd-emoji-suggestion');
                     img.src = element.url;
                     img.alt = `:${element.name}:`;
+                    img.style.maxHeight = "64px";
+                    img.style.maxWidth = "";
 
-                    item.appendChild(document.createTextNode(` :${element.name}: `));
+                    item.appendChild(document.createTextNode(` ${element.name} `));
 
                     suggestionElement.addEventListener('click', () => {
                         const beforeEmote = textBeforeCursor.slice(0, match.index);
-                        const afterCursor = commentField.innerHTML.substring(cursorPosition);
+                        const afterCursor = commentField.textContent.substring(match.index + match[0].length);
 
-                        commentField.innerHTML = beforeEmote + `<img src="${element.url}" alt=":${element.name}:" />` + afterCursor;
+                        commentField.textContent = beforeEmote + element.name + afterCursor;
                         commentField.focus();
 
                         const newCursorPosition = beforeEmote.length + element.name.length + 2;
@@ -80,22 +127,90 @@ waitForElement('#contenteditable-root[contenteditable="true"]')
                         sel.removeAllRanges();
                         sel.addRange(range);
                     });
+
+                    activeIndex = 0;
+                    currentSuggestions[activeIndex].element.setAttribute('active', '');
                 });
 
             } else {
                 // Hide suggestions dropdown if no match
                 console.log("No emote trigger found before cursor.");
+                dropdown.style.display = "none";
+                currentSuggestions = [];
+                activeIndex = -1;
             }
 
         });
 
         commentField.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            const dropdown = document.querySelector('tp-yt-iron-dropdown#dropdown.style-scope.ytd-emoji-input');
+            
+            if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && currentSuggestions.length > 0) {
                 e.preventDefault();
-                // Logic to navigate suggestions would go here
-                const dropdown = document.querySelector('tp-yt-iron-dropdown#dropdown.style-scope.ytd-emoji-input');
-                console.log("Navigate suggestions in dropdown:", dropdown);
+                e.stopPropagation(); // Stop YouTube's native handler
                 
+                // Remove active attribute from ALL elements in dropdown
+                if (dropdown) {
+                    const allEmotes = dropdown.querySelectorAll('ytd-emoji-suggestion');
+                    allEmotes.forEach(el => el.removeAttribute('active'));
+                }
+                
+                // Update active index
+                if (e.key === 'ArrowDown') {
+                    activeIndex = (activeIndex + 1) % currentSuggestions.length;
+                } else if (e.key === 'ArrowUp') {
+                    activeIndex = activeIndex <= 0 ? currentSuggestions.length - 1 : activeIndex - 1;
+                }
+                
+                // Set active attribute on new active element
+                currentSuggestions[activeIndex].element.setAttribute('active', '');
+                
+                // Scroll the active element into view
+                currentSuggestions[activeIndex].element.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
+                
+                console.log("Navigate suggestions in dropdown:", dropdown, "Active index:", activeIndex);
+            } else if ((e.key === 'Enter' || e.key === 'Tab') && activeIndex >= 0 && activeIndex < currentSuggestions.length) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Select the active suggestion
+                const selectedEmote = currentSuggestions[activeIndex].data;
+                const selection = window.getSelection();
+                if (!selection.rangeCount) return;
+                
+                const range = selection.getRangeAt(0);
+                const preCaretRange = range.cloneRange();
+                preCaretRange.selectNodeContents(commentField);
+                preCaretRange.setEnd(range.endContainer, range.endOffset);
+                const cursorPosition = preCaretRange.toString().length;
+                
+                const textBeforeCursor = commentField.textContent.substring(0, cursorPosition);
+                const match = textBeforeCursor.match(/:([a-zA-Z0-9_]{2,})$/);
+                
+                if (match) {
+                    const beforeEmote = textBeforeCursor.slice(0, match.index);
+                    const afterCursor = commentField.textContent.substring(match.index + match[0].length);
+
+                    commentField.textContent = beforeEmote + selectedEmote.name + afterCursor +" ";
+                    commentField.focus();
+
+                    const newCursorPosition = beforeEmote.length + selectedEmote.name.length + 1;
+                    const range = document.createRange();
+                    const sel = window.getSelection();
+                    
+                    range.setStart(commentField.childNodes[0], newCursorPosition);
+                    range.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    
+                    // Clear suggestions
+                    currentSuggestions = [];
+                    activeIndex = -1;
+                    dropdown.style.display = "none";
+                }
             }
         });
     })
