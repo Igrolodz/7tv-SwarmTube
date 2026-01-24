@@ -103,5 +103,5 @@ async function reloadEmotes(){
 async function getEmoteSuggestions(query) {
     const emoteSet = await getEmotes();
     const suggestions = emoteSet.filter(emote => emote.name.toLowerCase().startsWith(query.toLowerCase()));
-    return suggestions.slice(0, 10);
+    return suggestions.slice(0, 25);
 }
