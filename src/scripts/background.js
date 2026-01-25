@@ -17,7 +17,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         });
     }
     if(msg.type === "GET_EMOTE_SUGGESTIONS"){
-        getEmoteSuggestions(msg.query).then(suggestions => {
+        getEmoteSuggestions(msg.query, msg.pickerContext).then(suggestions => {
             sendResponse({ suggestions });
         });
     }
@@ -100,8 +100,54 @@ async function reloadEmotes(){
     await chrome.storage.local.set({ emoteSet: mappedEmotes });
 }
 
-async function getEmoteSuggestions(query) {
+async function getEmoteSuggestions(query, pickerContext = false) {
     const emoteSet = await getEmotes();
-    const suggestions = emoteSet.filter(emote => emote.name.toLowerCase().startsWith(query.toLowerCase()));
-    return suggestions.slice(0, 25);
+    
+    const normalizedQuery = normalize(query);
+    
+    // Fuzzy search with scoring
+    const scoredEmotes = emoteSet.map(emote => {
+        const normalizedName = normalize(emote.name);
+        const score = fuzzyScore(normalizedQuery, normalizedName);
+        return { ...emote, score };
+    });
+    
+    // Filter out non-matches and sort by score
+    const suggestions = scoredEmotes
+        .filter(emote => emote.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, pickerContext ? 999 : 25);
+    
+    return suggestions;
+}
+
+function fuzzyScore(query, text) {
+    if (!query) return 0;
+    if (text.includes(query)) return 100 + (100 - text.indexOf(query));
+    
+    let score = 0;
+    let queryIndex = 0;
+    let lastMatchIndex = -1;
+    
+    for (let i = 0; i < text.length && queryIndex < query.length; i++) {
+        if (text[i] === query[queryIndex]) {
+            score += 10;
+            // Bonus for consecutive matches
+            if (lastMatchIndex === i - 1) {
+                score += 5;
+            }
+            // Bonus for matching at start
+            if (queryIndex === 0 && i === 0) {
+                score += 20;
+            }
+            lastMatchIndex = i;
+            queryIndex++;
+        }
+    }
+    
+    return queryIndex === query.length ? score : 0;
+}
+
+function normalize(str) {
+    return str.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
