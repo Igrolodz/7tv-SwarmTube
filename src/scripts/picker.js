@@ -56,6 +56,9 @@ waitForElement("#emojis").then(mainContainer => {
     return waitForElement("#category-buttons yt-emoji-picker-category-button-renderer");
 }).then(async () => {
     const mainContainer = document.querySelector("#emojis");
+    const emojiInput = document.querySelector("#input-1 > input");
+    const commentField = document.querySelector("#contenteditable-root");
+
     const emojiPanel = mainContainer.querySelector("#emoji");
     const buttonsDiv = emojiPanel.querySelector("#category-buttons");
 
@@ -120,6 +123,49 @@ waitForElement("#emojis").then(mainContainer => {
         emoteButton.setAttribute('role', 'option');
         emoteButton.setAttribute('aria-label', emote.name);
         emoteButton.setAttribute('aria-selected', 'false');
+
+        // Is Youtube drunk while coding their emoji picker or what. Why they need mouseover when there's no children elements???
+        emoteButton.addEventListener('mouseover', (e) => {
+            e.stopPropagation();
+        });
+
+        emoteButton.addEventListener('mouseenter', (e) => {
+            emoteButton.style.transform = 'scale(1.2)';
+            emoteButton.style.transition = 'transform 0.2s ease';
+
+            emojiInput.placeholder = `:${emote.name}:`;
+        });
+        
+        emoteButton.addEventListener('mouseleave', (e) => {
+            emoteButton.style.transform = 'scale(1)';
+            emojiInput.placeholder = 'Search emoji';
+        });
+
+        emoteButton.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+        });
+        // Using mousedown and click at the same time??? Youtube what the fuck. I might be too dumb to understand this.
+        emoteButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+
+            const textNode = document.createTextNode(`${emote.name} `);
+
+            range.deleteContents();
+            range.insertNode(textNode);
+
+            range.setStartAfter(textNode);
+            range.setEndAfter(textNode);
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            commentField.dispatchEvent(new Event('input', { bubbles: true }));
+            commentField.focus();
+        });
     });
 
     buttonContainer.addEventListener('click', (event) => {
@@ -133,7 +179,7 @@ waitForElement("#emojis").then(mainContainer => {
             behavior: 'smooth'
         });
 
-        // Weird ass Youtube error prevention
+        // Weird ass Youtube error prevention (doesn't work btw)
         const svgImage = randomAssDiv.querySelector('image');
         if (svgImage) {
             svgImage.addEventListener('mousedown', (event) => {
