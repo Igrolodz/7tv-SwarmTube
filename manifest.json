@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "SwarmTube",
     "version": "1.0",
-    "description": "Extension applying 7TV emotes to youtube comment section",
+    "description": "Extension bringing 7TV emotes to youtube comment section",
     "icons": {
         "16": "images/Icon.png",
         "32": "images/Icon.png",
@@ -12,13 +12,13 @@
     "content_scripts": [
         {
             "matches": ["https://*.youtube.com/*"],
-            "js": ["src/scripts/emotes.js", "src/scripts/autocomplete.js"]
+            "js": ["src/scripts/emotes.js", "src/scripts/autocomplete.js", "src/scripts/picker.js"]
         }
     ],
     "action": {
         "default_popup": "src/templates/popup.html"
     },
-    "permissions": ["storage", "identity", "scripting"],
+    "permissions": ["storage", "identity"],
     "host_permissions": [
         "https://api.twitch.tv/*",
         "https://id.twitch.tv/*"
