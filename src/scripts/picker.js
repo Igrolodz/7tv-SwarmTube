@@ -57,6 +57,8 @@ waitForElement("#emojis").then(mainContainer => {
 }).then(async () => {
     const mainContainer = document.querySelector("#emojis");
     const emojiInput = document.querySelector("#input-1 > input");
+    const searchCategory = document.querySelector('#search-category > #emoji');
+    const searchEmpty = document.querySelector('#search-empty');
     const commentField = document.querySelector("#contenteditable-root");
 
     const emojiPanel = mainContainer.querySelector("#emoji");
@@ -150,6 +152,7 @@ waitForElement("#emojis").then(mainContainer => {
             e.preventDefault();
             e.stopPropagation();
 
+            commentField.focus();
             const selection = window.getSelection();
             const range = selection.getRangeAt(0);
 
@@ -164,7 +167,6 @@ waitForElement("#emojis").then(mainContainer => {
             selection.addRange(range);
 
             commentField.dispatchEvent(new Event('input', { bubbles: true }));
-            commentField.focus();
         });
     });
 
@@ -250,7 +252,98 @@ waitForElement("#emojis").then(mainContainer => {
         root: categories, 
         threshold: 1 
     });
-
     observer.observe(categoryHeader);
+
+    let currentSearchId = 0; // Track the current search to prevent race conditions
+    
+    emojiInput.addEventListener('input', async () => {
+        console.log("Emoji search input:", emojiInput.value);
+        const query = emojiInput.value.toLowerCase();
+        const searchId = ++currentSearchId; // Increment and capture current search ID
+        
+        // Clear previous 7TV suggestions immediately
+        const swarmTubeEmotes = searchCategory.querySelectorAll('img.swarmTube-emote');
+        swarmTubeEmotes.forEach(emote => emote.remove());
+        
+        if (query.length === 0) return;
+
+        console.log("Fetching 7TV suggestions for query:", query);
+
+        const sugResponse = await chrome.runtime.sendMessage({ type: "GET_EMOTE_SUGGESTIONS", query: query });
+        
+        // Check if this search is still the latest one
+        if (searchId !== currentSearchId) {
+            console.log("Ignoring outdated search results");
+            return;
+        }
+        
+        const suggestions = sugResponse.suggestions;
+
+        if (suggestions.length === 0) {
+            searchEmpty.style.display = 'block';
+        } else {
+            searchEmpty.style.display = 'none';
+        }
+
+        console.log("7TV Suggestions:", suggestions);
+
+        suggestions.forEach(element => {
+            const emoteElem = searchCategory.appendChild(document.createElement('img'));
+            emoteElem.classList.add('style-scope', 'yt-emoji-picker-category-renderer', 'swarmTube-emote');
+            emoteElem.id = element.name;
+            emoteElem.height = 24;
+            emoteElem.width = 24;
+            emoteElem.src = element.url;
+            emoteElem.loading = 'lazy';
+            emoteElem.alt = element.name;
+            emoteElem.setAttribute('role', 'option');
+            emoteElem.setAttribute('aria-label', element.name);
+            emoteElem.setAttribute('aria-selected', 'false');
+
+
+            emoteElem.addEventListener('mouseover', (e) => {
+                e.stopPropagation();
+            });
+
+            emoteElem.addEventListener('mouseenter', (e) => {
+                emoteElem.style.transform = 'scale(1.2)';
+                emoteElem.style.transition = 'transform 0.2s ease';
+
+                emojiInput.placeholder = `:${emoteElem.alt}:`;
+            });
+            
+            emoteElem.addEventListener('mouseleave', (e) => {
+                emoteElem.style.transform = 'scale(1)';
+                emojiInput.placeholder = 'Search emoji';
+            });
+
+            emoteElem.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+            });
+
+            emoteElem.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                commentField.focus();
+                const selection = window.getSelection();
+                const range = selection.getRangeAt(0);
+
+                const textNode = document.createTextNode(`${emoteElem.alt} `);
+
+                range.deleteContents();
+                range.insertNode(textNode);
+
+                range.setStartAfter(textNode);
+                range.setEndAfter(textNode);
+                selection.removeAllRanges();
+                selection.addRange(range);
+
+                commentField.dispatchEvent(new Event('input', { bubbles: true }));
+            });
+
+        });
+    });
 
 });
