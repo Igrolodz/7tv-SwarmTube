@@ -39,6 +39,10 @@ async function processComment(element) {
     processTextNodes(element);
 }
 
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function processTextNodes(node) {
     if (node.hasAttribute && node.hasAttribute('data-emotes-processed')) return;
     
@@ -63,7 +67,8 @@ function processTextNodes(node) {
         emoteSet.forEach((emote) => {
             if (excludedEmotes.includes(emote.name)) return;
             
-            const regex = new RegExp(`\\b${emote.name}\\b`, 'g');
+            const escapedName = escapeRegExp(emote.name);
+            const regex = new RegExp(`\\b${escapedName}\\b`, 'g');
             if (regex.test(newHTML)) {
                 hasEmote = true;
                 const heightStyle = emoteSize === 1 ? "height: 24px;" : "";
