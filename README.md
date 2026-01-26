@@ -1,4 +1,4 @@
-# <img src="images/Icon.png" alt="SwarmTube Logo" width="32" style="vertical-align:middle;" /> SwarmTube
+# <img src="images/Icon.png" alt="SwarmTube Logo" width="29" style="vertical-align:middle;" /> SwarmTube
 
 This repository contains the source code for **SwarmTube**, a browser extension that enhances YouTube's comment section experience by integrating [7TV](https://7tv.app/) emotes and providing features like:
 
@@ -26,13 +26,10 @@ This repository contains the source code for **SwarmTube**, a browser extension 
 - ## **Swappable emote sets**
     If you're not a [Neuro-sama](https://www.twitch.tv/vedal987) fan, you can seamlessly switch between different emote sets from your favourite streamers to customize your commenting experience to different communities.
 
-> [!NOTE]
-> Requires Twitch login to access this feature. Login is optional for other features.
-
-
     <img src="images/swapsets_demo.gif" alt="Swap Emote Sets Demo" width="400" />
 
-
+> [!NOTE]
+> Requires Twitch login to access this feature. Login is optional for other features.
 
 ## Installation
 
