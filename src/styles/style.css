@@ -1,3 +1,8 @@
+@font-face {
+    font-family: 'FirstCoffee';
+    src: url('../../fonts/First\ Coffee.ttf');
+}
+
 :root{
     --black: #1e1e1e;
     --white: #fcfcfc;
@@ -10,7 +15,7 @@
 
 html{
     width: 300px;
-    font-family: sans-serif;
+    /* font-family: sans-serif; */
     color: var(--white);
 }
 
@@ -37,8 +42,14 @@ html:before{
     filter: blur(8px);
 }
 h2{
+    font-family: 'FirstCoffee';
+    font-weight: normal;
     text-align: center;
     color: var(--white);
+    margin: 0;
+    padding-top: 10px;
+    font-size: 2.3em;
+    letter-spacing: 1px;
 }
 
 main{
