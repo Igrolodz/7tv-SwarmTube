@@ -1,4 +1,4 @@
-// fuck Youtube DOM. Shit so complicated I had to start doing comments
+// fuck Youtube DOM. Shit so complicated I had to start doing comments 💀
 
 
 // Function to wait for an element to appear in the DOM
@@ -29,8 +29,6 @@ function waitForElement(selector) {
 
 waitForElement('#contenteditable-root[contenteditable="true"]')
     .then(commentField => {
-        console.log("Comment field found:", commentField);
-        
         let activeIndex = -1;
         let currentSuggestions = [];
 
@@ -38,7 +36,7 @@ waitForElement('#contenteditable-root[contenteditable="true"]')
 
         commentField.addEventListener('input', async (event) => {
             
-            // Get cursor position in contenteditable element
+            // Get cursor position
             const selection = window.getSelection();
             if (!selection.rangeCount) return;
             
@@ -54,14 +52,9 @@ waitForElement('#contenteditable-root[contenteditable="true"]')
             if (match) {
                 const query = match[1];
                 const response = await chrome.runtime.sendMessage({ type: 'GET_EMOTE_SUGGESTIONS', query: query });
-                const suggestions = response.suggestions;
-                console.log("Emote suggestions for query", query, ":", suggestions);
-                
-
-                console.log("Dropdown element:", dropdown);
+                const suggestions = response.suggestions;                
 
                 dropdown.style.display = "";
-
                 
                 // Clear all suggestions (native and custom)
                 const dropdownContent = dropdown.querySelector('.dropdown-content');
@@ -134,7 +127,6 @@ waitForElement('#contenteditable-root[contenteditable="true"]')
 
             } else {
                 // Hide suggestions dropdown if no match
-                console.log("No emote trigger found before cursor.");
                 dropdown.style.display = "none";
                 currentSuggestions = [];
                 activeIndex = -1;
@@ -147,7 +139,7 @@ waitForElement('#contenteditable-root[contenteditable="true"]')
             
             if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && currentSuggestions.length > 0) {
                 e.preventDefault();
-                e.stopPropagation(); // Stop YouTube's native handler
+                e.stopPropagation();
                 
                 // Remove active attribute from ALL elements in dropdown
                 if (dropdown) {
@@ -170,8 +162,6 @@ waitForElement('#contenteditable-root[contenteditable="true"]')
                     behavior: 'smooth',
                     block: 'nearest'
                 });
-                
-                console.log("Navigate suggestions in dropdown:", dropdown, "Active index:", activeIndex);
             } else if ((e.key === 'Enter' || e.key === 'Tab') && activeIndex >= 0 && activeIndex < currentSuggestions.length) {
                 e.preventDefault();
                 e.stopPropagation();

@@ -57,9 +57,7 @@ setNameBtn.addEventListener("click", async () => {
     const { twitchAccessToken, twitchTokenExpiry } = await chrome.storage.local.get(["twitchAccessToken", "twitchTokenExpiry"]);
     
     if (!twitchAccessToken || Date.now() >= twitchTokenExpiry){
-        // Trigger Twitch login
-        console.log("Starting Twitch login...");
-        chrome.runtime.sendMessage({ type: "TWICH_LOGIN" });
+        chrome.runtime.sendMessage({ type: "TWITCH_LOGIN" });
         return;
     }
 

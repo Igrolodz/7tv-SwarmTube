@@ -1,7 +1,7 @@
 const CLIENT_ID = 'h2x6fqe7pc2f7qxitb3l5p34kx78bk';
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-    if (msg.type === "TWICH_LOGIN"){
+    if (msg.type === "TWITCH_LOGIN"){
         startTwitchLogin();
     }
 
@@ -105,7 +105,7 @@ async function getEmoteSuggestions(query, pickerContext = false) {
     
     const normalizedQuery = normalize(query);
     
-    // Fuzzy search with scoring
+    // Fuzzy search time baby
     const scoredEmotes = emoteSet.map(emote => {
         const normalizedName = normalize(emote.name);
         const score = fuzzyScore(normalizedQuery, normalizedName);

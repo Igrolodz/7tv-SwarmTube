@@ -44,10 +44,6 @@ async function setList(){
             await removeEmote(element);
             emoteTableField.removeChild(emoteRow);
         });
-
-        console.log(element);
-        console.log(emoteSet);
-
     });
 }
 

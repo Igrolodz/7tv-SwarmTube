@@ -8,13 +8,11 @@ async function loadEmotes(){
 
     const response = await chrome.runtime.sendMessage({ type: 'GET_7TV_EMOTES' });
     emoteSet = response.emotes;
-    console.log("Loaded emote set:", emoteSet);
 
     const excluded = await chrome.storage.local.get("excludedEmotes");
     const size = await chrome.storage.local.get("emoteSize");
     emoteSize = size.emoteSize || 2;
     excludedEmotes = excluded.excludedEmotes || [];
-    console.log("Loaded excluded emotes:", excludedEmotes);
 }
 
 loadEmotes();
