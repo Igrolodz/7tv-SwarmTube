@@ -26,12 +26,12 @@ This repository contains the source code for **SwarmTube**, a browser extension 
 - ## **Swappable emote sets**
     If you're not a [Neuro-sama](https://www.twitch.tv/vedal987) fan, you can seamlessly switch between different emote sets from your favourite streamers to customize your commenting experience to different communities.
 
+> [!NOTE]
+> Requires Twitch login to access this feature. Login is optional for other features.
 
 
     <img src="images/swapsets_demo.gif" alt="Swap Emote Sets Demo" width="400" />
 
-> [!NOTE]
-> Requires Twitch login to access this feature. Login is optional for other features.
 
 
 ## Installation
