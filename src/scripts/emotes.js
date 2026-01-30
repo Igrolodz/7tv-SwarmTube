@@ -1,14 +1,20 @@
 var emoteSet = [];
 var excludedEmotes = [];
 var emoteSize = 2;
+var enabled = true;
 
+console.log("Content script loaded.");
 async function loadEmotes(){
-    var enabled = await chrome.storage.local.get("enabled");
+    enabled = await chrome.storage.local.get("enabled");
+    if (!enabled || enabled.enabled === undefined) {
+        enabled = { enabled: true };
+        await chrome.storage.local.set(enabled);
+    }
     if (!enabled.enabled) return;
 
     const response = await chrome.runtime.sendMessage({ type: 'GET_7TV_EMOTES' });
     emoteSet = response.emotes;
-
+    console.log("Loaded emotes:", emoteSet);
     const excluded = await chrome.storage.local.get("excludedEmotes");
     const size = await chrome.storage.local.get("emoteSize");
     emoteSize = size.emoteSize || 2;

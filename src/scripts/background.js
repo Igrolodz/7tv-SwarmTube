@@ -59,9 +59,7 @@ function handleAuthRedirect(redirectUrl) {
 async function getEmotes(){
     const emoteSet = await chrome.storage.local.get(['emoteSet']);
     if(!emoteSet || !emoteSet.emoteSet || Object.keys(emoteSet.emoteSet).length === 0){
-        
-        await reloadEmotes();
-        return mappedEmotes;
+        return await reloadEmotes();
     }
 
     return emoteSet.emoteSet;
@@ -98,6 +96,7 @@ async function reloadEmotes(){
     }));
 
     await chrome.storage.local.set({ emoteSet: mappedEmotes });
+    return mappedEmotes;
 }
 
 async function getEmoteSuggestions(query, pickerContext = false) {
