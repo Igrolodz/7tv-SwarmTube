@@ -53,7 +53,7 @@ waitForElement("#emojis").then(mainContainer => {
     return waitForElement("#category-buttons yt-emoji-picker-category-button-renderer");
 }).then(async () => {
     const mainContainer = document.querySelector("#emojis");
-    const emojiInput = document.querySelector("#input-1 > input");
+    const emojiInput = document.querySelector("#input-2 > input");
     const searchCategory = document.querySelector('#search-category > #emoji');
     const searchEmpty = document.querySelector('#search-empty');
     const commentField = document.querySelector("#contenteditable-root");
