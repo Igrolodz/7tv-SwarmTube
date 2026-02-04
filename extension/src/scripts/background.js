@@ -1,6 +1,9 @@
 const CLIENT_ID = 'h2x6fqe7pc2f7qxitb3l5p34kx78bk';
 
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+/** @type {typeof chrome} */
+const ext =  typeof browser === "undefined" ? chrome : browser;
+
+ext.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.type === "TWITCH_LOGIN"){
         startTwitchLogin();
     }
@@ -26,11 +29,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 function startTwitchLogin() {
-    const redirectUri = chrome.identity.getRedirectURL();
+    const redirectUri = ext.identity.getRedirectURL();
 
     const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=user:read:email`;
 
-    chrome.identity.launchWebAuthFlow(
+    ext.identity.launchWebAuthFlow(
         {
             url: authUrl,
             interactive: true
@@ -50,14 +53,14 @@ function handleAuthRedirect(redirectUrl) {
     if (!accessToken) return;
 
     const expiryTime = Date.now() + 60 * 24 * 60 * 60 * 1000;
-    chrome.storage.local.set({
+    ext.storage.local.set({
         twitchAccessToken: accessToken,
         twitchTokenExpiry: expiryTime
     });
 }
 
 async function getEmotes(){
-    const emoteSet = await chrome.storage.local.get(['emoteSet']);
+    const emoteSet = await ext.storage.local.get(['emoteSet']);
     if(!emoteSet || !emoteSet.emoteSet || Object.keys(emoteSet.emoteSet).length === 0){
         return await reloadEmotes();
     }
@@ -66,7 +69,7 @@ async function getEmotes(){
 }
 
 async function reloadEmotes(){
-    const userID = await chrome.storage.local.get("twitchUserID");
+    const userID = await ext.storage.local.get("twitchUserID");
     
     if (!userID.twitchUserID) userID.twitchUserID = "85498365"; // Default to Nurstreamer
 
@@ -87,7 +90,7 @@ async function reloadEmotes(){
         ...streamerSetData.emotes
     ]
 
-    const emoteSize = await chrome.storage.local.get("emoteSize");
+    const emoteSize = await ext.storage.local.get("emoteSize");
     if (!emoteSize.emoteSize || emoteSize.emoteSize === 1) emoteSize.emoteSize = 2;
 
     var mappedEmotes = allEmotes.map(e => ({
@@ -95,7 +98,7 @@ async function reloadEmotes(){
         url: `https:${e.data.host.url}/${emoteSize.emoteSize-1}x.webp`
     }));
 
-    await chrome.storage.local.set({ emoteSet: mappedEmotes });
+    await ext.storage.local.set({ emoteSet: mappedEmotes });
     return mappedEmotes;
 }
 

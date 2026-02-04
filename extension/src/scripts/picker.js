@@ -1,6 +1,12 @@
 // Pray to the youtube DOM god that it works first try(Spoiler: it doesn't)
 // Whoever stumbles upon this code, I'm sorry for what you're about to witness
 
+// /**
+//  * @type {typeof chrome}
+//  */
+// const ext = typeof browser === "undefined" ? chrome : browser;
+
+
 /**
  * Waits for an element matching the selector to be added to the DOM.
  * @returns {Promise<Element>}
@@ -108,7 +114,7 @@ waitForElement("#emojis").then(mainContainer => {
     emojisGrid.setAttribute('role', 'listbox');
     emojisGrid.setAttribute('aria-label', 'swarmTube');
 
-    const emoteResponse = await chrome.runtime.sendMessage({ type: "GET_7TV_EMOTES" });
+    const emoteResponse = await ext.runtime.sendMessage({ type: "GET_7TV_EMOTES" });
 
     emoteResponse.emotes.forEach(emote => {
         const emoteButton = emojisGrid.appendChild(document.createElement('img'));
@@ -261,7 +267,7 @@ waitForElement("#emojis").then(mainContainer => {
         
         if (query.length === 0) return;
 
-        const sugResponse = await chrome.runtime.sendMessage({ type: "GET_EMOTE_SUGGESTIONS", query: query });
+        const sugResponse = await ext.runtime.sendMessage({ type: "GET_EMOTE_SUGGESTIONS", query: query });
         
         // Check if this search is still the latest one
         if (searchId !== currentSearchId) {

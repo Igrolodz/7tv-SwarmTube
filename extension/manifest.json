@@ -24,6 +24,7 @@
         "https://id.twitch.tv/*"
     ],
     "background": {
+        "scripts": ["src/scripts/background.js"],
         "service_worker": "src/scripts/background.js"
     }
 }

@@ -3,19 +3,24 @@ var excludedEmotes = [];
 var emoteSize = 2;
 var enabled = true;
 
+/**
+ * @type {typeof chrome}
+ */
+const ext = typeof browser === "undefined" ? chrome : browser;
+
 async function loadEmotes(){
-    enabled = await chrome.storage.local.get("enabled");
+    enabled = await ext.storage.local.get("enabled");
     if (!enabled || enabled.enabled === undefined) {
         enabled = { enabled: true };
-        await chrome.storage.local.set(enabled);
+        await ext.storage.local.set(enabled);
     }
     if (!enabled.enabled) return;
 
-    const response = await chrome.runtime.sendMessage({ type: 'GET_7TV_EMOTES' });
+    const response = await ext.runtime.sendMessage({ type: 'GET_7TV_EMOTES' });
     emoteSet = response.emotes;
     console.log("[SwarmTube] Loaded emotes:", emoteSet);
-    const excluded = await chrome.storage.local.get("excludedEmotes");
-    const size = await chrome.storage.local.get("emoteSize");
+    const excluded = await ext.storage.local.get("excludedEmotes");
+    const size = await ext.storage.local.get("emoteSize");
     emoteSize = size.emoteSize || 2;
     excludedEmotes = excluded.excludedEmotes || [];
 }

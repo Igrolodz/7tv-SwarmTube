@@ -1,5 +1,9 @@
 // fuck Youtube DOM. Shit so complicated I had to start doing comments 💀
 
+// /**
+//  * @type {typeof chrome}
+//  */
+// const ext = typeof browser === "undefined" ? chrome : browser;
 
 // Function to wait for an element to appear in the DOM
 /** @returns {Promise<Element>} */ 
@@ -51,7 +55,7 @@ waitForElement('#contenteditable-root[contenteditable="true"]')
 
             if (match) {
                 const query = match[1];
-                const response = await chrome.runtime.sendMessage({ type: 'GET_EMOTE_SUGGESTIONS', query: query });
+                const response = await ext.runtime.sendMessage({ type: 'GET_EMOTE_SUGGESTIONS', query: query });
                 const suggestions = response.suggestions;                
 
                 dropdown.style.display = "";

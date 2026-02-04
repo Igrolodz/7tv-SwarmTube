@@ -5,11 +5,16 @@ const emoteListBtn = document.getElementById("emote-list");
 const emoteSizeInput = document.getElementById("emote-size");
 const refreshEmotesBtn = document.getElementById("refresh-emotes");
 
+/**
+ * @type {typeof chrome}
+ */
+const ext = typeof browser === "undefined" ? chrome : browser;
+
 // Initialize toggle state
-chrome.storage.local.get("enabled").then(({ enabled }) => {
+ext.storage.local.get("enabled").then(({ enabled }) => {
     if (!enabled && enabled !== false) {
         enabled = true;
-        chrome.storage.local.set({ enabled: true });
+        ext.storage.local.set({ enabled: true });
     }
     
     if (enabled) {
@@ -21,16 +26,16 @@ chrome.storage.local.get("enabled").then(({ enabled }) => {
     }
 });
 
-chrome.storage.local.get("twitchName").then(({ twitchName }) => {
+ext.storage.local.get("twitchName").then(({ twitchName }) => {
     if (twitchName) {
         document.getElementById("twitch-name").value = twitchName;
     }
 });
 
-chrome.storage.local.get("emoteSize").then(({ emoteSize }) => {
+ext.storage.local.get("emoteSize").then(({ emoteSize }) => {
     if (!emoteSize) {
         emoteSize = 2;
-        chrome.storage.local.set({ emoteSize: 2 });
+        ext.storage.local.set({ emoteSize: 2 });
     }
     emoteSizeInput.value = emoteSize;
     const sizeValue = document.getElementById("size-value");
@@ -38,10 +43,10 @@ chrome.storage.local.get("emoteSize").then(({ emoteSize }) => {
 });
 
 toggleBtn.addEventListener("click", async () => {
-    const { enabled } = await chrome.storage.local.get("enabled");
+    const { enabled } = await ext.storage.local.get("enabled");
     const newState = !(enabled ?? false);
     
-    await chrome.storage.local.set({enabled: newState});
+    await ext.storage.local.set({enabled: newState});
 
     // Toggle classes
     if (newState) {
@@ -54,10 +59,10 @@ toggleBtn.addEventListener("click", async () => {
 });
 
 setNameBtn.addEventListener("click", async () => {
-    const { twitchAccessToken, twitchTokenExpiry } = await chrome.storage.local.get(["twitchAccessToken", "twitchTokenExpiry"]);
+    const { twitchAccessToken, twitchTokenExpiry } = await ext.storage.local.get(["twitchAccessToken", "twitchTokenExpiry"]);
     
     if (!twitchAccessToken || Date.now() >= twitchTokenExpiry){
-        chrome.runtime.sendMessage({ type: "TWITCH_LOGIN" });
+        ext.runtime.sendMessage({ type: "TWITCH_LOGIN" });
         return;
     }
 
@@ -80,7 +85,7 @@ setNameBtn.addEventListener("click", async () => {
         });
         const data = await response.json();
         
-        await chrome.storage.local.set({twitchName: twitchName.value, twitchUserID: data.data[0].id});
+        await ext.storage.local.set({twitchName: twitchName.value, twitchUserID: data.data[0].id});
 
         twitchName.value = "Saved!";
         setTimeout(() => {
@@ -103,7 +108,7 @@ setNameBtn.addEventListener("click", async () => {
 exEmoteBtn.addEventListener("click", async () => {
     const excludedEmoteField = document.getElementById("excluded-emotes");
     var excludedEmote = excludedEmoteField.value;
-    const { excludedEmotes = [] } = await chrome.storage.local.get("excludedEmotes");
+    const { excludedEmotes = [] } = await ext.storage.local.get("excludedEmotes");
 
     if (!excludedEmote || excludedEmotes.includes(excludedEmote)){
         excludedEmoteField.value = "INVALID OR ALREADY EXCLUDED!";
@@ -114,7 +119,7 @@ exEmoteBtn.addEventListener("click", async () => {
     }
 
     excludedEmotes.push(excludedEmote);
-    await chrome.storage.local.set({excludedEmotes: excludedEmotes});
+    await ext.storage.local.set({excludedEmotes: excludedEmotes});
     
     excludedEmoteField.value = "Saved!";
     setTimeout(() => {
@@ -123,8 +128,8 @@ exEmoteBtn.addEventListener("click", async () => {
 });
 
 emoteListBtn.addEventListener("click", async () => {
-    chrome.windows.create({
-        url: chrome.runtime.getURL("src/templates/excluded.html"),
+    ext.windows.create({
+        url: ext.runtime.getURL("src/templates/excluded.html"),
         type: "popup",
         width: 420,
         height: 600
@@ -134,13 +139,13 @@ emoteListBtn.addEventListener("click", async () => {
 emoteSizeInput.addEventListener("input", async () => {
     const sizeValue = document.getElementById("size-value");
     sizeValue.textContent = `${emoteSizeInput.value}x`;
-    await chrome.storage.local.set({emoteSize: parseInt(emoteSizeInput.value)});
+    await ext.storage.local.set({emoteSize: parseInt(emoteSizeInput.value)});
 });
 
 
 refreshEmotesBtn.addEventListener("click", async () => {
     refreshEmotesBtn.textContent = "Reloading...";
-    var response = await chrome.runtime.sendMessage({ type: "RELOAD_7TV_EMOTES" });
+    var response = await ext.runtime.sendMessage({ type: "RELOAD_7TV_EMOTES" });
     if (response.success){
         refreshEmotesBtn.textContent = "Success!";
         setTimeout(() => {
