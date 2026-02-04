@@ -63,6 +63,10 @@ async function removeEmote(emoteName){
 }
 
 
+window.addEventListener("blur", () => {
+    window.close();
+});
+
 document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
         window.close();
