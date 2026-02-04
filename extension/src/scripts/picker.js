@@ -1,11 +1,6 @@
 // Pray to the youtube DOM god that it works first try(Spoiler: it doesn't)
 // Whoever stumbles upon this code, I'm sorry for what you're about to witness
 
-// /**
-//  * @type {typeof chrome}
-//  */
-// const ext = typeof browser === "undefined" ? chrome : browser;
-
 
 /**
  * Waits for an element matching the selector to be added to the DOM.

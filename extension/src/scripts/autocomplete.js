@@ -1,9 +1,5 @@
 // fuck Youtube DOM. Shit so complicated I had to start doing comments 💀
 
-// /**
-//  * @type {typeof chrome}
-//  */
-// const ext = typeof browser === "undefined" ? chrome : browser;
 
 // Function to wait for an element to appear in the DOM
 /** @returns {Promise<Element>} */ 
