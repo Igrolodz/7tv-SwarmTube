@@ -93,7 +93,7 @@ async function reloadEmotes(){
     
     // Twitch stuff
     const twitchEnabled = await ext.storage.local.get("twitchEnabled");
-    const allTwitchEmotes = [];
+    var allTwitchEmotes = [];
     
     if (twitchEnabled.twitchEnabled){
         const twitchAccessToken = await ext.storage.local.get("twitchAccessToken");
