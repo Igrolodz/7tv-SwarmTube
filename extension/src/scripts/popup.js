@@ -4,6 +4,7 @@ const exEmoteBtn = document.getElementById("excluded-emotes-set");
 const emoteListBtn = document.getElementById("emote-list");
 const emoteSizeInput = document.getElementById("emote-size");
 const refreshEmotesBtn = document.getElementById("refresh-emotes");
+const twitchCheckbox = document.getElementById("twitch-checkbox");
 
 /**
  * @type {typeof chrome}
@@ -23,6 +24,16 @@ ext.storage.local.get("enabled").then(({ enabled }) => {
     } else {
         toggleBtn.classList.remove("on");
         toggleBtn.classList.add("off");
+    }
+});
+
+ext.storage.local.get("twitchEnabled").then(({ twitchEnabled }) => {
+    if (twitchEnabled) {
+        twitchCheckbox.classList.remove("off");
+        twitchCheckbox.classList.add("on");
+    } else {
+        twitchCheckbox.classList.remove("on");
+        twitchCheckbox.classList.add("off");
     }
 });
 
@@ -157,5 +168,19 @@ refreshEmotesBtn.addEventListener("click", async () => {
         setTimeout(() => {
             refreshEmotesBtn.textContent = "Reload Emotes";
         }, 2000);
+    }
+});
+
+twitchCheckbox.addEventListener("click", async () => {
+    const { twitchEnabled } = await ext.storage.local.get("twitchEnabled");
+    const newState = !(twitchEnabled ?? false);
+    await ext.storage.local.set({twitchEnabled: newState});
+
+    if (newState) {
+        twitchCheckbox.classList.remove("off");
+        twitchCheckbox.classList.add("on");
+    } else {
+        twitchCheckbox.classList.remove("on");
+        twitchCheckbox.classList.add("off");
     }
 });
