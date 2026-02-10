@@ -1,4 +1,4 @@
-const CLIENT_ID = 'h2x6fqe7pc2f7qxitb3l5p34kx78bk';
+const CLIENT_ID = 'h2x6fqe7pc2f7qxitb3l5p34kx78bk'; // Twitch Client ID for API calls
 
 /** @type {typeof chrome} */
 const ext =  typeof browser === "undefined" ? chrome : browser;
@@ -30,6 +30,7 @@ ext.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 function startTwitchLogin() {
     const redirectUri = ext.identity.getRedirectURL();
+    console.log('Redirect URI:', redirectUri); // Debug: Check this value!
 
     const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=user:read:email`;
 
@@ -70,36 +71,96 @@ async function getEmotes(){
 
 async function reloadEmotes(){
     const userID = await ext.storage.local.get("twitchUserID");
-    
     if (!userID.twitchUserID) userID.twitchUserID = "85498365"; // Default to Nurstreamer
 
     const [globalRes, streamerRes] = await Promise.all([
         fetch('https://7tv.io/v3/emote-sets/global'),
-        fetch(`https://7tv.io/v3/users/twitch/${userID.twitchUserID}`),
+        fetch(`https://7tv.io/v3/users/twitch/${userID.twitchUserID}`)
     ]);
+
+    // 7TV stuff
     const globalData = await globalRes.json();
     const streamerData = await streamerRes.json();
-    
     
     const streamerSetID = streamerData.emote_set_id;
     const setResponse = await fetch(`https://7tv.io/v3/emote-sets/${streamerSetID}`);
     const streamerSetData = await setResponse.json();
-
-    const allEmotes = [
+    
+    const all7TVEmotes = [
         ...globalData.emotes,
-        ...streamerSetData.emotes
-    ]
+        ...streamerSetData.emotes,
+    ];
+    
+    // Twitch stuff
+    const twitchEnabled = await ext.storage.local.get("twitchEnabled");
+    const allTwitchEmotes = [];
+    
+    if (twitchEnabled.twitchEnabled){
+        const twitchAccessToken = await ext.storage.local.get("twitchAccessToken");
+        if (!twitchAccessToken.twitchAccessToken) {
+            startTwitchLogin();
+            return;
+        }
 
+        const [twitchChannelRes, twitchGlobalRes] = await Promise.all([
+            fetch(`https://api.twitch.tv/helix/chat/emotes?broadcaster_id=${userID.twitchUserID}`, {
+                headers: {
+                    'Client-ID': CLIENT_ID,
+                    'Authorization': `Bearer ${twitchAccessToken.twitchAccessToken}`
+                }
+            }),
+            fetch(`https://api.twitch.tv/helix/chat/emotes/global`, {
+                headers: {
+                    'Client-ID': CLIENT_ID,
+                    'Authorization': `Bearer ${twitchAccessToken.twitchAccessToken}`
+                }
+            })
+        ]);
+    
+        const twitchChannelData = await twitchChannelRes.json();
+        const twitchGlobalData = await twitchGlobalRes.json();
+    
+        allTwitchEmotes = [
+            ...twitchChannelData.data,
+            ...twitchGlobalData.data,
+        ];
+    }
+    
+    // Exceptional emotes of superiority
+    const specialEmotes = [
+        {
+            name: "NeuroJAM",
+            id: "emotesv2_16862a2d50724c34b78499f3c094ce47"
+        },
+        {
+            name: "EvilJAM",
+            id: "emotesv2_c3134ab06c334403a7691d3ef58441d1"
+        },
+        {
+            name: "ShouldiCelebrate",
+            id: "emotesv2_3cef4c51d4aa45be822ee327f97650a0"
+        }
+    ];
+    allTwitchEmotes.push(...specialEmotes);
+
+    
     const emoteSize = await ext.storage.local.get("emoteSize");
     if (!emoteSize.emoteSize || emoteSize.emoteSize === 1) emoteSize.emoteSize = 2;
 
-    var mappedEmotes = allEmotes.map(e => ({
+    const mappedEmotes = all7TVEmotes.map(e => ({
         name: e.name,
         url: `https:${e.data.host.url}/${emoteSize.emoteSize-1}x.webp`
     }));
 
-    await ext.storage.local.set({ emoteSet: mappedEmotes });
-    return mappedEmotes;
+    const twitchMappedEmotes = allTwitchEmotes.map(e => ({
+        name: e.name,
+        url: `https://static-cdn.jtvnw.net/emoticons/v2/${e.id}/default/dark/${emoteSize.emoteSize-1}.0`
+    }));
+
+    const allMappedEmotes = [...mappedEmotes, ...twitchMappedEmotes];
+
+    await ext.storage.local.set({ emoteSet: allMappedEmotes });
+    return allMappedEmotes;
 }
 
 async function getEmoteSuggestions(query, pickerContext = false) {
