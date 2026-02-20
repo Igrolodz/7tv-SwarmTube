@@ -33,7 +33,7 @@ This repository contains the source code for **SwarmTube**, a browser extension 
 
 ## Installation
 
-**Recommended** way to install SwarmTube is via the [Chrome Web Store](https://chromewebstore.google.com/detail/swarmtube/gejfihckhbenahdkbfalfodepcicmdda).
+**Recommended** way to install SwarmTube is via the [Chrome Web Store](https://chromewebstore.google.com/detail/swarmtube/gejfihckhbenahdkbfalfodepcicmdda) and [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/swarmtube/).
 
 Alternatively, you can install it manually:
 1. Clone this repository to your local machine.
@@ -41,3 +41,6 @@ Alternatively, you can install it manually:
 3. Enable "Developer mode" using the toggle in the top right corner.
 4. Click "Load unpacked" and select the cloned repository folder.
 5. The extension should now be **installed and active**.
+
+> [!WARNING]
+> This method is for development purposes and will NOT receive automatic updates. For the best experience, installing from the Chrome Web Store or Firefox Add-ons is recommended.
